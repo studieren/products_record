@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}自动编号 - 数据管理系统{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item">
+    <a href="{{ url_for('list_details', main_id=detail.main_id) }}">产品详情</a>
+  </li>
+  <li class="breadcrumb-item">
+    <a href="{{ url_for('edit_details', id=detail.id) }}">编辑详情</a>
+  </li>
+  <li class="breadcrumb-item active" aria-current="page">自动编号</li>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">为 "{{ detail.self_model }}" 自动生成编号</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('auto_number_details', id=detail.id) }}">
+        <div class="mb-4">
+          <label for="prefix" class="form-label">编号前缀</label>
+          <input type="text" class="form-control" id="prefix" name="prefix" 
+                 value="{{ defaults.prefix }}" placeholder="例如: SLN 或 DWM1329" required />
+          <div class="form-text">必填项，生成编号的固定前缀部分</div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label for="start_number" class="form-label">起始值</label>
+            <input type="number" class="form-control" id="start_number" name="start_number" 
+                   value="{{ defaults.start_number }}" min="1" required />
+            <div class="form-text">编号开始的数字</div>
+          </div>
+          <div class="col-md-4">
+            <label for="increment" class="form-label">递增值</label>
+            <input type="number" class="form-control" id="increment" name="increment" 
+                   value="{{ defaults.increment }}" min="1" required />
+            <div class="form-text">每次递增的数值</div>
+          </div>
+          <div class="col-md-4">
+            <label for="digits" class="form-label">数字位数</label>
+            <input type="number" class="form-control" id="digits" name="digits" 
+                   value="{{ defaults.digits }}" min="1" max="10" required />
+            <div class="form-text">编号数字部分的位数</div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">当前编号</label>
+          <input type="text" class="form-control" value="{{ detail.self_model or '无' }}" disabled />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">预览</label>
+          <div class="alert alert-info">
+            <strong>格式示例:</strong> {{ preview_value }}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('edit_details', id=detail.id) }}" class="btn btn-outline-secondary">返回编辑</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-hashtag"></i> 生成编号
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {# 移除了所有前端JavaScript逻辑 #}
+{% endblock %}

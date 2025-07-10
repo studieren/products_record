@@ -1,0 +1,5 @@
+# Flask 应用配置
+SECRET_KEY = 'e7b0ed54c62988439bf6756b78622192ae935ba2227d553debb38f902fa60fc7'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///your_database.db'
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+DEBUG = True  # 开发环境开启，生产环境请关闭

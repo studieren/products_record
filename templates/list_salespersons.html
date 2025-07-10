@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">销售员信息列表</h2>
+    <table class="table table-bordered table-striped">
+      <thead class="table-light">
+        <tr>
+          <th>中文名</th>
+          <th>英文名</th>
+          <th>手机号</th>
+          <th>邮箱</th>
+          <th>微信</th>
+          <th>WhatsApp</th>
+          <th>Facebook</th>
+          <th>Instagram</th>
+          <th>Tiktok</th>
+          <th>Twitter</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in salespersons %}
+          <tr>
+            <td>{{ s.name_cn }}</td>
+            <td>{{ s.name_en }}</td>
+            <td>{{ s.phone }}</td>
+            <td>{{ s.email }}</td>
+            <td>
+              {% if s.wechat %}
+                <a href="{{ s.wechat }}" target="_blank">微信</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.whatsapp %}
+                <a href="{{ s.whatsapp }}" target="_blank">WhatsApp</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.facebook %}
+                <a href="{{ s.facebook }}" target="_blank">Facebook</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.instagram %}
+                <a href="{{ s.instagram }}" target="_blank">Instagram</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.tiktok %}
+                <a href="{{ s.tiktok }}" target="_blank">Tiktok</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.twitter %}
+                <a href="{{ s.twitter }}" target="_blank">Twitter/X</a>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('edit_salesperson', id=s.id) }}" class="btn btn-sm btn-outline-primary">编辑</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="/" class="btn btn-secondary">返回首页</a>
+  </div>
+{% endblock %}

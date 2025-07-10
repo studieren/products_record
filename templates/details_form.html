@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{% if detail %}编辑{% else %}添加{% endif %} 详情 - 数据管理系统{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ url_for('list_main') }}">产品列表</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('list_details', main_id=main.id) }}">{{ main.title }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if detail %}编辑{% else %}添加{% endif %}详情</li>
+{% endblock %}
+
+{% block content %}
+<div>
+    <form method="post" action="{{ url_for('download_all_images') }}" id="download-all-form">
+        <button type="submit" class="btn btn-danger">批量下载所有未替换的图片</button>
+      </form>
+  
+</div>
+    <div class="form-container">
+        <h3 class="mb-4">{% if detail %}编辑{% else %}添加{% endif %} 详情</h3>
+        <p class="text-muted"><a href="{{ main.url }}" target="_blank">标题: {{ main.title }}</a></p>
+        
+        {% if detail %}  <!-- 只在编辑时显示自动编号按钮 -->
+        <div>
+            <a href="{{ url_for('auto_number_details', id=detail.id) }}" class="btn btn-outline-secondary">
+              <i class="bi bi-hashtag"></i> 自动编号
+            </a>
+        </div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="mb-3">
+                <label for="other_model" class="form-label">对方型号</label>
+                <input type="text" class="form-control" id="other_model" name="other_model" 
+                       value="{{ detail.other_model if detail else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="self_model" class="form-label">自用型号</label>
+                <input type="text" class="form-control" id="self_model" name="self_model" 
+                       value="{{ detail.self_model if detail else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="price" class="form-label">价格</label>
+                <input type="number" step="0.01" class="form-control" id="price" name="price" 
+                       value="{{ detail.price if detail else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="stock" class="form-label">库存</label>
+                <input type="number" class="form-control" id="stock" name="stock" 
+                       value="{{ detail.stock if detail else '0' }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="image_url" class="form-label">图片URL</label>
+                <input type="url" class="form-control" id="image_url" name="image_url" 
+                       value="{{ detail.image_url if detail else '' }}">
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{{ url_for('list_details', main_id=main.id) }}" class="btn btn-outline-secondary me-2">取消</a>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+      <!-- 添加一个简单的JavaScript函数来处理按钮点击事件 -->
+      <script>
+        document.getElementById('download-all-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          fetch(this.action, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+              alert(`已启动批量下载任务，共 ${data.count} 条`);
+              location.reload();
+            })
+            .catch(err => {
+              alert("任务启动失败，请检查控制台");
+              console.error(err);
+            });
+        });
+        </script>
+        
+{% endblock %}

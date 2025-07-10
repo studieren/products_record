@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">编辑销售员信息</h2>
+    <form method="POST" class="form-container">
+      <div class="mb-3">
+        <label class="form-label">中文名</label>
+        <input type="text" name="name_cn" class="form-control" value="{{ salesperson.name_cn }}" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">英文名</label>
+        <input type="text" name="name_en" class="form-control" value="{{ salesperson.name_en }}" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">手机号</label>
+        <input type="text" name="phone" class="form-control" value="{{ salesperson.phone }}" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">邮箱</label>
+        <input type="email" name="email" class="form-control" value="{{ salesperson.email }}" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">微信</label>
+        <input type="text" name="wechat" class="form-control" value="{{ salesperson.wechat }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">WhatsApp</label>
+        <input type="text" name="whatsapp" class="form-control" value="{{ salesperson.whatsapp }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Facebook</label>
+        <input type="text" name="facebook" class="form-control" value="{{ salesperson.facebook }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Instagram</label>
+        <input type="text" name="instagram" class="form-control" value="{{ salesperson.instagram }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tiktok</label>
+        <input type="text" name="tiktok" class="form-control" value="{{ salesperson.tiktok }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Twitter</label>
+        <input type="text" name="twitter" class="form-control" value="{{ salesperson.twitter }}" />
+      </div>
+      <button type="submit" class="btn btn-primary">保存</button>
+      <a href="{{ url_for('list_salespersons') }}" class="btn btn-secondary">取消</a>
+    </form>
+  </div>
+{% endblock %}

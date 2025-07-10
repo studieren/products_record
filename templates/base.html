@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      {% block title %}
+        数据管理系统
+      {% endblock %}
+    </title>
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" />
+    <style>
+      body {
+        padding-top: 20px;
+        background-color: #f8f9fa;
+      }
+      a {
+        text-decoration: none;
+      }
+      .container {
+        max-width: 1200px;
+      }
+      .table-responsive {
+        margin-top: 20px;
+      }
+      .form-container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .action-buttons .btn {
+        margin-right: 5px;
+      }
+      .page-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      .export-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        text-align: center;
+      }
+      .export-btn {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+      .export-btn:hover {
+        background-color: #45a049;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .error {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        border-top-color: #000;
+        animation: spin 1s ease-in-out infinite;
+        margin-left: 10px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="search-container">
+        <form action="{{ url_for('search') }}" method="get" class="row g-3">
+          <div class="col-md-10">
+            <input type="text" name="q" class="form-control" placeholder="搜索标题、公司名称、型号..." value="{{ request.args.get('q', '') }}" />
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">搜索</button>
+          </div>
+        </form>
+      </div>
+      <!-- 路由快捷导航按钮 -->
+      <div class="d-flex justify-content-start flex-wrap gap-2 mb-4">
+        <a href="{{ url_for('add_company') }}" class="btn btn-outline-primary btn-sm">➕ 添加公司</a>
+        <a href="{{ url_for('list_companies') }}" class="btn btn-outline-secondary btn-sm">📋 查看公司</a>
+        <a href="{{ url_for('add_salesperson') }}" class="btn btn-outline-success btn-sm">➕ 添加销售员</a>
+        <a href="{{ url_for('list_salespersons') }}" class="btn btn-outline-info btn-sm">📋 查看销售员</a>
+      </div>
+
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('list_main') }}">首页</a>
+          </li>
+          {% block breadcrumb %}
+
+          {% endblock %}
+        </ol>
+      </nav>
+
+      {% with messages=get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}
+
+      {% endblock %}
+    </div>
+    <!-- 图片模态框 -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+          <div class="modal-body p-0 text-center">
+            <img id="modalImage" src="" alt="放大图片" class="img-fluid" style="max-height: 80vh;" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // 点击模态框内容阻止冒泡
+        document.getElementById('imageModal').addEventListener('click', function (e) {
+          if (e.target === this) {
+            // 点击模态框背景关闭
+            bootstrap.Modal.getInstance(this).hide()
+          }
+        })
+      
+        // 点击图片不关闭模态框
+        if (document.getElementById('modalImage')) {
+          document.getElementById('modalImage').addEventListener('click', function (e) {
+            e.stopPropagation()
+          })
+        }
+      })
+    </script>
+    {% block scripts %}
+
+    {% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">公司信息列表</h2>
+    <table class="table table-bordered table-striped">
+      <thead class="table-light">
+        <tr>
+          <th>中文名</th>
+          <th>英文名</th>
+          <th>中文地址</th>
+          <th>英文地址</th>
+          <th>网址</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for company in companies %}
+          <tr>
+            <td>{{ company.name_cn }}</td>
+            <td>{{ company.name_en }}</td>
+            <td>{{ company.address_cn }}</td>
+            <td>{{ company.address_en }}</td>
+            <td>
+              <a href="{{ company.website }}" target="_blank">{{ company.website }}</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a href="/" class="btn btn-secondary">返回首页</a>
+  </div>
+{% endblock %}

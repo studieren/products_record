@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{% if main %}编辑{% else %}添加{% endif %} 产品 - 数据管理系统{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ url_for('list_main') }}">产品列表</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if main %}编辑{% else %}添加{% endif %} 产品</li>
+{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h3 class="mb-4">{% if main %}编辑{% else %}添加{% endif %} 产品</h3>
+        
+        <form method="POST">
+            <div class="mb-3">
+                <label for="url" class="form-label">URL</label>
+                <input type="url" class="form-control" id="url" name="url" value="{{ main.url if main else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">标题</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ main.title if main else '' }}" >
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_name" class="form-label">公司名称</label>
+                <input type="text" class="form-control" id="company_name" name="company_name" value="{{ main.company_name if main else '' }}" >
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_url" class="form-label">公司网址</label>
+                <input type="url" class="form-control" id="company_url" name="company_url" value="{{ main.company_url if main else '' }}" >
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{{ url_for('list_main') }}" class="btn btn-outline-secondary me-2">取消</a>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+    {% if loading %}
+    <div class="loading-notice">
+        <p>正在自动获取数据，请稍候刷新页面查看...</p>
+    </div>
+    {% endif %}
+    {% endblock %}
+

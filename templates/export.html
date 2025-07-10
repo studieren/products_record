@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+  <button id="downloadBtn">导出 CSV</button>
+
+  <script>
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+      fetch('/export/csv')
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('网络响应失败')
+          }
+          return response.blob()
+        })
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'exported_data.csv' // 浏览器将使用默认下载目录
+          document.body.appendChild(a)
+          a.click()
+          a.remove()
+          window.URL.revokeObjectURL(url)
+        })
+        .catch((error) => {
+          alert('导出失败: ' + error.message)
+        })
+    })
+  </script>
+{% endblock %}

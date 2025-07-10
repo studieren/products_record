@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  搜索结果 - 数据管理系统
+{% endblock %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active" aria-current="page">搜索结果</li>
+{% endblock %}
+
+{% block content %}
+  <h2 class="page-header">搜索结果</h2>
+
+  {% if query %}
+    <p class="mb-4">
+      搜索关键词: <strong>"{{ query }}"</strong>
+    </p>
+  {% endif %}
+
+  {% if results %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">标题</th>
+            <th scope="col">公司名称</th>
+            <th scope="col">匹配类型</th>
+            <th scope="col">对方型号</th>
+            <th scope="col">自用型号</th>
+            <th scope="col">价格</th>
+            <th scope="col">库存</th>
+            <th scope="col">图片</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in results %}
+            <tr>
+              <td>
+                <a href="{{ url_for('list_details', main_id=result.main.id) }}">{{ result.main.title }}</a>
+              </td>
+              <td>{{ result.main.company_name }}</td>
+              <td>
+                {% if result.match_type == 'main' %}
+                  <span class="badge bg-primary">主信息匹配</span>
+                {% else %}
+                  <span class="badge bg-success">型号匹配</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if result.detail.other_model and query.lower() in result.detail.other_model.lower() %}
+                  <mark>{{ result.detail.other_model }}</mark>
+                {% else %}
+                  {{ result.detail.other_model }}
+                {% endif %}
+              </td>
+              <td>
+                {% if result.detail.self_model and query.lower() in result.detail.self_model.lower() %}
+                  <mark>{{ result.detail.self_model }}</mark>
+                {% else %}
+                  {{ result.detail.self_model }}
+                {% endif %}
+              </td>
+              <td>
+                {% if result.detail.price %}
+                  ¥{{ '%.2f'|format(result.detail.price) }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                  {{ result.detail.stock_str }}
+              </td>
+              <td>
+                {% if result.detail.image_url %}
+                  <a href="javascript:void(0);" onclick="showImageModal('{{ result.detail.image_url }}')"><img src="{{ result.detail.image_url }}" alt="产品图片" class="img-thumbnail" style="max-width: 200px;" /></a>
+                {% else %}
+                  <span class="text-muted">无图片</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      {% if query %}
+        没有找到匹配的结果
+      {% else %}
+        请输入搜索关键词
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
