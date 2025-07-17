@@ -28,6 +28,27 @@ class Details(db.Model):
     local_image_path = db.Column(db.String(255), nullable=True)
 
 
+class WholesalePrice(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    details_id = db.Column(db.Integer, db.ForeignKey("details.id"), nullable=False)
+    min_quantity = db.Column(db.Integer, nullable=False)  # 最小起订量
+    max_quantity = db.Column(db.Integer)  # 最大起订量，若为 None 则表示无上限@property
+    price = db.Column(db.String(20), nullable=False) 
+    
+    # 建立与 Details 模型的反向关联
+    details = db.relationship(
+        "Details",
+        backref=db.backref("wholesale_prices", lazy=True, cascade="all, delete-orphan"),
+    )
+
+    # 添加唯一约束，确保同一产品的起订量范围不重叠
+    __table_args__ = (
+        db.UniqueConstraint(
+            "details_id", "min_quantity", name="uq_details_min_quantity"
+        ),
+    )
+
+
 class ImageRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     details_id = db.Column(db.Integer, db.ForeignKey("details.id"), nullable=False)

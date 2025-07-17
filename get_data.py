@@ -147,6 +147,100 @@ def type_two(tab):
     return products_list
 
 
+def parse_price_fragments(fragments):
+    prices = []
+    current = []
+    for part in fragments:
+        if part.strip() == "¥":
+            if current:
+                prices.append(current)
+            current = []
+        else:
+            current.append(part)
+    if current:
+        prices.append(current)
+    return [float("".join(p)) for p in prices]
+
+
+def parse_quantity_range(qty_text):
+    if "起批" in qty_text:
+        min_qty = int(re.search(r"\d+", qty_text).group())
+        return {"min": min_qty, "max": None}
+    elif "≥" in qty_text:
+        min_qty = int(re.search(r"\d+", qty_text).group())
+        return {"min": min_qty, "max": None}
+    elif "-" in qty_text:
+        nums = list(map(int, re.findall(r"\d+", qty_text)))
+        if len(nums) == 2:
+            return {"min": nums[0], "max": nums[1]}
+    return {"min": None, "max": None}
+
+
+def get_price(html_text):
+    if not html_text:
+        return None
+
+    html_content = etree.HTML(html_text)
+
+    price_xpath1 = '//div[contains(@class,"range-price")]/span/text()'
+    price_xpath2 = '//div[@class="price-component step-price"]//div[@class="price-info currency"]//span/text()'
+    price_fragments1 = html_content.xpath(price_xpath1)
+    if price_fragments1:
+        if price_fragments1[0] == "券后":
+            price_fragments1 = html_content.xpath(price_xpath2)
+    price_list = parse_price_fragments(price_fragments1)
+
+    quantity_xpath = '//div[contains(@class,"price-component")]/p/text()'
+    quantity_list = html_content.xpath(quantity_xpath)
+    if quantity_list:
+        print(quantity_list)
+    print("price_list")
+    print(price_list)
+    print("quantity_list")
+    print(quantity_list)
+    if len(price_list) != len(quantity_list):
+        price = price_list[0]
+        quantity = quantity_list[0]
+        if quantity:
+            match = re.search(r"\d{1,8}", quantity)
+            print(quantity)
+            try:
+                if match:
+                    quantity = match.group(0)
+                else:
+                    quantity = 1
+            except:
+                quantity = 1
+
+        # print(price)
+        # print(quantity)
+
+        wholesale_prices = [{"min": quantity, "max": None, "price": price}]
+        print(wholesale_prices)
+        # 测试示例 [{'min': 1, 'max': None, 'price': 6.2}]
+        return wholesale_prices
+
+    # Step 1: 初步配对
+    wholesale_prices = []
+
+    for qty_text, price in zip(quantity_list, price_list):
+        q_range = parse_quantity_range(qty_text)
+        q_range["price"] = price
+
+        wholesale_prices.append(q_range)
+
+    # Step 2: 自动填充 max（除了最后一个）
+    for i in range(len(wholesale_prices) - 1):
+        if wholesale_prices[i]["max"] is None:
+            wholesale_prices[i]["max"] = wholesale_prices[i + 1]["min"] - 1
+
+    print(wholesale_prices)
+
+    # 测试示例 [{'min': 1, 'max': 11, 'price': 5.7}, {'min': 12, 'max': 24, 'price': 5.6}, {'min': 24, 'max': None, 'price': 5.5}]
+
+    return wholesale_prices
+
+
 def analysis_data(url, ifvisit=True):
     tab = down_data(url, ifvisit)
     type_xpath = '//div[@id="skuSelection"]//div[@class="feature-item"]'
@@ -178,12 +272,18 @@ def analysis_data(url, ifvisit=True):
     else:
         products_list = type_two(tab)
 
+    price_xpath = 'x://div[@id="mainPrice"]'
+    price_html = tab.ele(price_xpath).inner_html
+    print(price_html)
+    price_data = get_price(price_html)
+
     my_dict = {
         "url": url,
         "title": title,
         "company_name": company_name,
         "company_url": company_url,
         "products": products_list,
+        "price_data": price_data,
     }
     print(my_dict)
     return my_dict
@@ -193,10 +293,18 @@ if __name__ == "__main__":
     # url = "https://detail.1688.com/offer/800331861182.html?offerId=800331861182&spm=a260k.home2025.recommendpart.4"
     url = "https://detail.1688.com/offer/843708233884.html?_t=1750819202560&spm=a2615.7691456.co_0_0_wangpu_score_0_0_0_0_0_0_0000_0.0"
     # url = "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI"  # 多按钮，多尺寸，点击
+    # url=''
     # get_page(url)
-    ifvisit = True
-    # ifvisit = False
-    data = analysis_data(url, ifvisit)
+    # ifvisit = True
+    ifvisit = False
+
+    # 有效的函数
+    # data = analysis_data(url, ifvisit)
+
+    with open("temp.html", "r", encoding="utf-8") as f:
+        html_text = f.read()
+    get_price(html_text)
+
     # print(data)
 
     # tab = down_data(url)
