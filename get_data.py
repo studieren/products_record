@@ -3,6 +3,7 @@ import re
 from DrissionPage import Chromium
 from lxml import etree
 import time
+from decimal import Decimal, ROUND_HALF_UP
 
 # 全局浏览器实例
 _browser = None
@@ -147,98 +148,229 @@ def type_two(tab):
     return products_list
 
 
-def parse_price_fragments(fragments):
-    prices = []
-    current = []
-    for part in fragments:
-        if part.strip() == "¥":
-            if current:
-                prices.append(current)
-            current = []
-        else:
-            current.append(part)
-    if current:
-        prices.append(current)
-    return [float("".join(p)) for p in prices]
+# def parse_price_fragments(fragments):
+#     prices = []
+#     current = []
+#     for part in fragments:
+#         if part.strip() == "¥":
+#             if current:
+#                 prices.append(current)
+#             current = []
+#         else:
+#             current.append(part)
+#     if current:
+#         prices.append(current)
+#     return [float("".join(p)) for p in prices]
 
 
-def parse_quantity_range(qty_text):
-    if "起批" in qty_text:
-        min_qty = int(re.search(r"\d+", qty_text).group())
-        return {"min": min_qty, "max": None}
-    elif "≥" in qty_text:
-        min_qty = int(re.search(r"\d+", qty_text).group())
-        return {"min": min_qty, "max": None}
-    elif "-" in qty_text:
-        nums = list(map(int, re.findall(r"\d+", qty_text)))
-        if len(nums) == 2:
-            return {"min": nums[0], "max": nums[1]}
-    return {"min": None, "max": None}
+# def parse_quantity_range(qty_text):
+#     if "起批" in qty_text:
+#         min_qty = int(re.search(r"\d+", qty_text).group())
+#         return {"min": min_qty, "max": None}
+#     elif "≥" in qty_text:
+#         min_qty = int(re.search(r"\d+", qty_text).group())
+#         return {"min": min_qty, "max": None}
+#     elif "-" in qty_text:
+#         nums = list(map(int, re.findall(r"\d+", qty_text)))
+#         if len(nums) == 2:
+#             return {"min": nums[0], "max": nums[1]}
+#     return {"min": None, "max": None}
 
 
-def get_price(html_text):
-    if not html_text:
+# def get_price(html_text):
+#     if not html_text:
+#         return None
+
+#     html_content = etree.HTML(html_text)
+
+#     price_xpath1 = '//div[contains(@class,"range-price")]/span/text()'
+#     price_xpath2 = '//div[@class="price-component step-price"]//div[@class="price-info currency"]//span/text()'
+#     price_fragments1 = html_content.xpath(price_xpath1)
+#     if price_fragments1:
+#         if price_fragments1[0] == "券后":
+#             price_fragments1 = html_content.xpath(price_xpath2)
+#     price_list = parse_price_fragments(price_fragments1)
+
+#     quantity_xpath = '//div[contains(@class,"price-component")]/p/text()'
+#     quantity_list = html_content.xpath(quantity_xpath)
+#     if quantity_list:
+#         print(quantity_list)
+#     print("price_list")
+#     print(price_list)
+#     print("quantity_list")
+#     print(quantity_list)
+#     if len(price_list) != len(quantity_list):
+#         price = price_list[0]
+#         quantity = quantity_list[0]
+#         if quantity:
+#             match = re.search(r"\d{1,8}", quantity)
+#             print(quantity)
+#             try:
+#                 if match:
+#                     quantity = match.group(0)
+#                 else:
+#                     quantity = 1
+#             except:
+#                 quantity = 1
+
+#         # print(price)
+#         # print(quantity)
+
+#         wholesale_prices = [{"min": quantity, "max": None, "price": price}]
+#         print(wholesale_prices)
+#         # 测试示例 [{'min': 1, 'max': None, 'price': 6.2}]
+#         return wholesale_prices
+
+#     # Step 1: 初步配对
+#     wholesale_prices = []
+
+#     for qty_text, price in zip(quantity_list, price_list):
+#         q_range = parse_quantity_range(qty_text)
+#         q_range["price"] = price
+
+#         wholesale_prices.append(q_range)
+
+#     # Step 2: 自动填充 max（除了最后一个）
+#     for i in range(len(wholesale_prices) - 1):
+#         if wholesale_prices[i]["max"] is None:
+#             wholesale_prices[i]["max"] = wholesale_prices[i + 1]["min"] - 1
+
+#     print(wholesale_prices)
+
+#     # 测试示例 [{'min': 1, 'max': 11, 'price': 5.7}, {'min': 12, 'max': 24, 'price': 5.6}, {'min': 24, 'max': None, 'price': 5.5}]
+
+#     return wholesale_prices
+
+
+def read_html_file(file_path="temp.html"):
+    """读取HTML文件内容"""
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"错误：找不到文件 {file_path}")
+        return None
+    except Exception as e:
+        print(f"读取文件时发生错误：{e}")
         return None
 
-    html_content = etree.HTML(html_text)
 
-    price_xpath1 = '//div[contains(@class,"range-price")]/span/text()'
-    price_xpath2 = '//div[@class="price-component step-price"]//div[@class="price-info currency"]//span/text()'
-    price_fragments1 = html_content.xpath(price_xpath1)
-    if price_fragments1:
-        if price_fragments1[0] == "券后":
-            price_fragments1 = html_content.xpath(price_xpath2)
-    price_list = parse_price_fragments(price_fragments1)
+def extract_price_text(element):
+    """从价格元素中提取价格文本"""
+    price_parts = element.xpath('.//div[@class="price-info currency"]/span/text()')
+    return "".join(price_parts[1:])  # 跳过货币符号
 
-    quantity_xpath = '//div[contains(@class,"price-component")]/p/text()'
-    quantity_list = html_content.xpath(quantity_xpath)
-    if quantity_list:
-        print(quantity_list)
-    print("price_list")
-    print(price_list)
-    print("quantity_list")
-    print(quantity_list)
-    if len(price_list) != len(quantity_list):
-        price = price_list[0]
-        quantity = quantity_list[0]
-        if quantity:
-            match = re.search(r"\d{1,8}", quantity)
-            print(quantity)
-            try:
-                if match:
-                    quantity = match.group(0)
-                else:
-                    quantity = 1
-            except:
-                quantity = 1
 
-        # print(price)
-        # print(quantity)
+def parse_quantity_text(quantity_text):
+    """解析数量文本，返回最小和最大数量"""
+    if not quantity_text:
+        return 1, None
 
-        wholesale_prices = [{"min": quantity, "max": None, "price": price}]
-        print(wholesale_prices)
-        # 测试示例 [{'min': 1, 'max': None, 'price': 6.2}]
-        return wholesale_prices
+    # 处理"1个起批"格式
+    match_single = re.match(r"(\d+)\s*个?\s*起批", quantity_text)
+    if match_single:
+        return int(match_single.group(1)), None
 
-    # Step 1: 初步配对
-    wholesale_prices = []
+    # 处理"≥24个"格式
+    match_min = re.match(r"≥\s*(\d+)\s*个?", quantity_text)
+    if match_min:
+        return int(match_min.group(1)), None
 
-    for qty_text, price in zip(quantity_list, price_list):
-        q_range = parse_quantity_range(qty_text)
-        q_range["price"] = price
+    # 处理"12-24个"格式
+    match_range = re.match(r"(\d+)\s*-\s*(\d+)\s*个?", quantity_text)
+    if match_range:
+        return int(match_range.group(1)), int(match_range.group(2))
 
-        wholesale_prices.append(q_range)
+    # 默认返回
+    return 1, None
 
-    # Step 2: 自动填充 max（除了最后一个）
-    for i in range(len(wholesale_prices) - 1):
-        if wholesale_prices[i]["max"] is None:
-            wholesale_prices[i]["max"] = wholesale_prices[i + 1]["min"] - 1
 
-    print(wholesale_prices)
+def process_step_prices(step_price_div):
+    """处理阶梯价格"""
+    price_comps = step_price_div.xpath('.//div[@class="price-comp"]')
+    price_data = []
 
-    # 测试示例 [{'min': 1, 'max': 11, 'price': 5.7}, {'min': 12, 'max': 24, 'price': 5.6}, {'min': 24, 'max': None, 'price': 5.5}]
+    for comp in price_comps:
+        price_text = extract_price_text(comp)
+        price = Decimal(price_text).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-    return wholesale_prices
+        quantity_text = comp.xpath(".//p/span/text()")
+        quantity_text = quantity_text[0] if quantity_text else ""
+
+        min_qty, max_qty = parse_quantity_text(quantity_text)
+        price_data.append({"min": min_qty, "max": max_qty, "price": price})
+
+    # 确保每个阶梯的 max = 下一个阶梯的 min - 1
+    for i in range(len(price_data) - 1):
+        price_data[i]["max"] = price_data[i + 1]["min"] - 1  # 关键修改
+
+    return price_data
+
+
+def process_range_price(range_price_div):
+    """处理范围价格"""
+    price_comps = range_price_div.xpath('.//div[@class="price-comp"]')
+    prices = []
+
+    for comp in price_comps:
+        price_text = extract_price_text(comp)
+        if price_text:
+            # 使用Decimal处理价格
+            prices.append(
+                Decimal(price_text).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            )
+
+    if not prices:
+        return []
+
+    # 如果有多个价格，返回最高价格
+    max_price = max(prices)
+
+    # 提取起批数量
+    quantity_text = range_price_div.xpath('.//p[contains(text(), "起批")]/text()')
+    quantity_text = quantity_text[0].strip() if quantity_text else ""
+
+    min_qty, _ = parse_quantity_text(quantity_text)
+
+    return [{"min": min_qty, "max": None, "price": max_price}]
+
+
+def extract_prices(html_content):
+    """从HTML内容中提取价格信息"""
+    if not html_content:
+        return []
+
+    tree = etree.HTML(html_content)
+    all_products = []
+
+    # 查找所有价格模块
+    price_modules = tree.xpath('//div[@id="mainPrice"]')
+
+    for module in price_modules:
+        # 检查是否为阶梯价
+        step_price_div = module.xpath('.//div[contains(@class, "step-price")]')
+
+        if step_price_div:
+            # 处理阶梯价
+            product_prices = process_step_prices(step_price_div[0])
+        else:
+            # 处理非阶梯价（范围价格）
+            range_price_div = module.xpath('.//div[contains(@class, "range-price")]')
+
+            if range_price_div:
+                class_name = range_price_div[0].get("class")
+                span_ele = module.xpath('//span[@class="label-name"]')
+
+                print(class_name)
+                print(span_ele[0].text)
+                product_prices = process_range_price(range_price_div[0])
+            else:
+                product_prices = []
+
+        if product_prices:
+            all_products = product_prices
+
+    return all_products
 
 
 def analysis_data(url, ifvisit=True):
@@ -273,9 +405,8 @@ def analysis_data(url, ifvisit=True):
         products_list = type_two(tab)
 
     price_xpath = 'x://div[@id="mainPrice"]'
-    price_html = tab.ele(price_xpath).inner_html
-    print(price_html)
-    price_data = get_price(price_html)
+    price_html = tab.ele(price_xpath).html
+    price_data = extract_prices(price_html)
 
     my_dict = {
         "url": url,
@@ -291,19 +422,20 @@ def analysis_data(url, ifvisit=True):
 
 if __name__ == "__main__":
     # url = "https://detail.1688.com/offer/800331861182.html?offerId=800331861182&spm=a260k.home2025.recommendpart.4"
-    url = "https://detail.1688.com/offer/843708233884.html?_t=1750819202560&spm=a2615.7691456.co_0_0_wangpu_score_0_0_0_0_0_0_0000_0.0"
-    # url = "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI"  # 多按钮，多尺寸，点击
+    # url = "https://detail.1688.com/offer/843708233884.html?_t=1750819202560&spm=a2615.7691456.co_0_0_wangpu_score_0_0_0_0_0_0_0000_0.0"
+    url = "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI"  # 多按钮，多尺寸，点击
     # url=''
     # get_page(url)
     # ifvisit = True
     ifvisit = False
 
     # 有效的函数
-    # data = analysis_data(url, ifvisit)
+    data = analysis_data(url, ifvisit)
 
-    with open("temp.html", "r", encoding="utf-8") as f:
-        html_text = f.read()
-    get_price(html_text)
+    # 从文件读取HTML内容
+    # html_content = read_html_file()
+    # formatted_prices = extract_prices(html_content)
+    # print(formatted_prices)
 
     # print(data)
 
@@ -311,32 +443,31 @@ if __name__ == "__main__":
     # type_two(tab)
 
     # # 示例字典1
-    # mydict1 = {
-    #     "url": "https://detail.1688.com/offer/843708233884.html?_t=1750819202560&spm=a2615.7691456.co_0_0_wangpu_score_0_0_0_0_0_0_0000_0.0",
-    #     "title": "欧美夸张复古玻璃胸针女气质优雅服装配饰高级感胸花金属饰品别针",
-    #     "company_name": "义乌市唯曼饰品有限公司",
-    #     "company_url": "https://ywwmsp888.1688.com/page/creditdetail.htm",
-    #     "products": [
-    #         {
-    #             "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01uzzfdF1smZkEWi0Dm_!!2146215809-0-cib.jpg",
-    #             "sku": "古金、深咖+浅咖+金黄亚克力（环保袋包）",
-    #             "price": "5.7",
-    #             "stock": "346",
-    #         },
-    #         {
-    #             "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01TJzKuu1smZnEVtw0D_!!2146215809-0-cib.jpg",
-    #             "sku": "古金、深紫+浅紫+白AB+紫色亚克力",
-    #             "price": "5.7",
-    #             "stock": "178",
-    #         },
-    #         {
-    #             "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01Tvpx9c1smZnFKH75f_!!2146215809-0-cib.jpg",
-    #             "sku": "古金、墨兰+灰钻+白AB+灰色亚克力",
-    #             "price": "5.7",
-    #             "stock": "147",
-    #         },
-    #     ],
-    # }
+    mydict1 = {
+        "url": "https://detail.1688.com/offer/843708233884.html?_t=1750819202560&spm=a2615.7691456.co_0_0_wangpu_score_0_0_0_0_0_0_0000_0.0",
+        "title": "欧美夸张复古玻璃胸针女气质优雅服装配饰高级感胸花金属饰品别针",
+        "company_name": "义乌市唯曼饰品有限公司",
+        "company_url": "https://ywwmsp888.1688.com/page/creditdetail.htm",
+        "products": [
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01uzzfdF1smZkEWi0Dm_!!2146215809-0-cib.jpg",
+                "sku": "古金、深咖+浅咖+金黄亚克力（环保袋包）",
+                "price": "5.5",
+                "stock": "333",
+            },
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01TJzKuu1smZnEVtw0D_!!2146215809-0-cib.jpg",
+                "sku": "古金、深紫+浅紫+白AB+紫色亚克力",
+                "price": "5.5",
+                "stock": "172",
+            },
+        ],
+        "price_data": [
+            {"min": 1, "max": 11, "price": Decimal("5.70")},
+            {"min": 12, "max": 23, "price": Decimal("5.60")},
+            {"min": 24, "max": None, "price": Decimal("5.50")},
+        ],
+    }
 
     # # 示例字典2
     # mydict2 = {
