@@ -279,9 +279,15 @@ def batch_download_images(details_ids):
 
 
 def get_best_prices(product):
+    # 初始化默认属性（处理无详情的情况）
+    product.min_price = 0.0
+    product.max_price = 0.0
+    product.min_moq = 1
+    product.moqs = [1]
+    product.spec_count = 0
+
     if product.details:
         first_detail = product.details[0]
-
         # 处理图片路径
         if first_detail.local_image_path and os.path.exists(
             first_detail.local_image_path
@@ -297,8 +303,7 @@ def get_best_prices(product):
             float(price.price)
             for detail in product.details
             for price in detail.wholesale_prices
-        ] + [detail.price for detail in product.details]
-
+        ] + [detail.price for detail in product.details if detail.price is not None]
         moqs = {
             price.min_quantity
             for detail in product.details
@@ -310,21 +315,16 @@ def get_best_prices(product):
             product.min_price = min(all_prices)
             product.max_price = max(all_prices)
             product.min_moq = min(moqs) if moqs else 1
-            product.moqs = sorted(moqs)  # 排序后的起订量列表
-            product.spec_count = len(product.details)  # 规格数量
+            product.moqs = sorted(moqs) if moqs else [1]
+            product.spec_count = len(product.details)
         else:
-            # 如果没有批发价格，使用详情中的基础价格
-            price = first_detail.price
-            product.min_price = price
-            product.max_price = price
+            # 如果没有价格数据，使用默认值
+            product.min_price = 0.0
+            product.max_price = 0.0
             product.min_moq = 1
             product.moqs = [1]
             product.spec_count = len(product.details)
-        print(product.min_price)
-        print(product.max_price)
-        print(product.min_moq)
-        print(product.moqs)
-        print("-" * 60)
+
     return product
 
 
