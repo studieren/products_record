@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}用户、角色与权限管理{% endblock %}
+{% block content %}
+<div class="mt-4">
+    <h1>管理面板</h1>
+
+    <!-- 用户管理 -->
+    <h2 class="mt-5">用户管理</h2>
+    <a href="{{ url_for('add_user') }}" class="btn btn-primary mb-3">添加用户</a>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>中文名</th>
+                <th>角色</th>
+                <th>是否激活</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.name_cn or '' }}</td>
+                <td>{{ user.role_names }}</td>
+                <td>{{ '是' if user.is_active else '否' }}</td>
+                <td>
+                    <a href="{{ url_for('edit_user', id=user.id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('delete_user', id=user.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定删除此用户？')">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 角色管理 -->
+    <h2 class="mt-5">角色管理</h2>
+    <a href="{{ url_for('add_role') }}" class="btn btn-primary mb-3">添加角色</a>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>角色名称</th>
+                <th>权限</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for role in roles %}
+            <tr>
+                <td>{{ role.id }}</td>
+                <td>{{ role.name }}</td>
+                <td>{{ role.permissions_names }}</td>
+                <td>
+                    <a href="{{ url_for('edit_role', id=role.id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('delete_role', id=role.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定删除此角色？')">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 权限管理 -->
+    <h2 class="mt-5">权限管理</h2>
+    <a href="{{ url_for('add_permission') }}" class="btn btn-primary mb-3">添加权限</a>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>权限代码</th>
+                <th>权限名称</th>
+                <th>内容类型</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for perm in permissions %}
+            <tr>
+                <td>{{ perm.id }}</td>
+                <td>{{ perm.codename }}</td>
+                <td>{{ perm.name }}</td>
+                <td>{{ perm.content_type }}</td>
+                <td>
+                    <a href="{{ url_for('edit_permission', id=perm.id) }}" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="{{ url_for('delete_permission', id=perm.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定删除此权限？')">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">返回首页</a>
+</div>
+{% endblock %}

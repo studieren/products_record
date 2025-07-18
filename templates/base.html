@@ -8,7 +8,7 @@
         数据管理系统
       {% endblock %}
     </title>
-    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" />
     <style>
       body {
         padding-top: 20px;
@@ -88,6 +88,13 @@
   </head>
   <body>
     <div class="container">
+      <!-- 用户信息和退出登录按钮 -->
+      <div class="user-info">
+        {% if current_user.is_authenticated %}
+          <span class="text-muted">欢迎，{{ current_user.username }}</span>
+          <a href="/logout" class="btn btn-danger btn-sm ms-2">退出登录</a>
+        {% endif %}
+      </div>
       <div class="search-container">
         <form action="{{ url_for('search') }}" method="get" class="row g-3">
           <div class="col-md-10">
@@ -97,13 +104,6 @@
             <button type="submit" class="btn btn-primary w-100">搜索</button>
           </div>
         </form>
-      </div>
-      <!-- 路由快捷导航按钮 -->
-      <div class="d-flex justify-content-start flex-wrap gap-2 mb-4">
-        <a href="{{ url_for('add_company') }}" class="btn btn-outline-primary btn-sm">➕ 添加公司</a>
-        <a href="{{ url_for('list_companies') }}" class="btn btn-outline-secondary btn-sm">📋 查看公司</a>
-        <a href="{{ url_for('add_salesperson') }}" class="btn btn-outline-success btn-sm">➕ 添加销售员</a>
-        <a href="{{ url_for('list_salespersons') }}" class="btn btn-outline-info btn-sm">📋 查看销售员</a>
       </div>
 
       <nav aria-label="breadcrumb" class="mb-4">
@@ -142,7 +142,7 @@
         </div>
       </div>
     </div>
-    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // 点击模态框内容阻止冒泡
@@ -164,6 +164,6 @@
     {% block scripts %}
 
     {% endblock %}
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/axios.min.js') }}"></script>
   </body>
 </html>

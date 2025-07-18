@@ -4,7 +4,7 @@
 
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="{{ url_for('list_main') }}">产品列表</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for('list_details', main_id=main.id) }}">{{ main.title }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('list_details', product_id=main.id) }}">{{ main.title }}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{% if detail %}编辑{% else %}添加{% endif %}详情</li>
 {% endblock %}
 
@@ -59,7 +59,7 @@
             </div>
             
             <div class="d-flex justify-content-end mt-4">
-                <a href="{{ url_for('list_details', main_id=main.id) }}" class="btn btn-outline-secondary me-2">取消</a>
+                <a href="{{ url_for('list_details', product_id=main.id) }}" class="btn btn-outline-secondary me-2">取消</a>
                 <button type="submit" class="btn btn-primary">保存</button>
             </div>
         </form>

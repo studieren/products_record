@@ -4,7 +4,7 @@
 
 {% block breadcrumb %}
   <li class="breadcrumb-item">
-    <a href="{{ url_for('list_details', main_id=detail.main_id) }}">产品详情</a>
+    <a href="{{ url_for('list_details', product_id=detail.product_id) }}">产品详情</a>
   </li>
   <li class="breadcrumb-item">
     <a href="{{ url_for('edit_details', id=detail.id) }}">编辑详情</a>

@@ -1,0 +1,86 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">添加销售员信息</h2>
+  <form method="post">
+    <div class="mb-3">
+      <!-- 新增：用户名 -->
+      <div class="mb-3">
+        <label class="form-label">用户名（用于登录）</label>
+        <input type="text" class="form-control" name="username" required />
+      </div>
+
+      <!-- 新增：密码 -->
+      <div class="mb-3">
+        <label class="form-label">密码</label>
+        <input type="password" class="form-control" name="password" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">确认密码</label>
+        <input
+          type="password"
+          class="form-control"
+          id="confirm_password"
+          required
+        />
+        <div class="invalid-feedback" id="pwd_error" style="display: none">
+          两次密码不一致
+        </div>
+      </div>
+      <label class="form-label">中文名</label>
+      <input type="text" class="form-control" name="name_cn" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">英文名</label>
+      <input type="text" class="form-control" name="name_en" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">手机号</label>
+      <input type="text" class="form-control" name="phone" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">邮箱</label>
+      <input type="email" class="form-control" name="email" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">微信链接</label>
+      <input type="url" class="form-control" name="wechat" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">WhatsApp 链接</label>
+      <input type="url" class="form-control" name="whatsapp" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Facebook 链接</label>
+      <input type="url" class="form-control" name="facebook" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Instagram 链接</label>
+      <input type="url" class="form-control" name="instagram" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Tiktok 链接</label>
+      <input type="url" class="form-control" name="tiktok" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Twitter 链接</label>
+      <input type="url" class="form-control" name="twitter" />
+    </div>
+    <button type="submit" class="btn btn-primary">提交</button>
+    <a href="/" class="btn btn-secondary">返回首页</a>
+  </form>
+</div>
+<script>
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const pwd = document.querySelector('[name="password"]').value;
+    const confirm = document.getElementById("confirm_password").value;
+    const err = document.getElementById("pwd_error");
+    if (pwd !== confirm) {
+      e.preventDefault();
+      err.style.display = "block";
+    } else {
+      err.style.display = "none";
+    }
+  });
+</script>
+{% endblock %}

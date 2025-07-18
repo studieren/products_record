@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mt-5">
+    <h2 class="mb-4">添加销售员信息</h2>
+    <form method="post" class="needs-validation" novalidate>
+      <!-- 登录信息组 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">登录信息</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">用户名（用于登录）</label>
+              <input type="text" class="form-control" name="username" required />
+              <div class="invalid-feedback">请输入用户名</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">密码</label>
+              <input type="password" class="form-control" name="password" id="password" required />
+              <div class="invalid-feedback">请输入密码</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">确认密码</label>
+              <input type="password" class="form-control" id="confirm_password" required />
+              <div class="invalid-feedback" id="pwd_error">两次密码不一致</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 基本信息组 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">基本信息</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">中文名</label>
+              <input type="text" class="form-control" name="name_cn" required />
+              <div class="invalid-feedback">请输入中文名</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">英文名</label>
+              <input type="text" class="form-control" name="name_en" required />
+              <div class="invalid-feedback">请输入英文名</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">手机号</label>
+              <input type="text" class="form-control" name="phone" required />
+              <div class="invalid-feedback">请输入手机号</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">邮箱</label>
+              <input type="email" class="form-control" name="email" required />
+              <div class="invalid-feedback">请输入有效的邮箱地址</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 社交账号组 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">社交账号（可选）</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">微信链接</label>
+              <input type="url" class="form-control" name="wechat" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">WhatsApp 链接</label>
+              <input type="url" class="form-control" name="whatsapp" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Facebook 链接</label>
+              <input type="url" class="form-control" name="facebook" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Instagram 链接</label>
+              <input type="url" class="form-control" name="instagram" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Tiktok 链接</label>
+              <input type="url" class="form-control" name="tiktok" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Twitter 链接</label>
+              <input type="url" class="form-control" name="twitter" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 权限设置组 -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">权限设置</h5>
+        </div>
+        <div class="card-body">
+          <!-- 是否激活 -->
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked />
+            <label class="form-check-label" for="is_active">是否激活</label>
+          </div>
+
+          <!-- 角色选择 -->
+          <div class="mb-4">
+            <label class="form-label d-block">角色（可多选）</label>
+            <div class="row">
+              {% for role in roles %}
+                <div class="col-md-3">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="roles" value="{{ role.id }}" id="role_{{ role.id }}" 
+                    {% if role.name=='销售员' %}checked{% endif %}
+                    />
+                    <label class="form-check-label" for="role_{{ role.id }}">{{ role.name }}</label>
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-muted">暂无可用角色，请先创建角色</div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- 操作按钮 -->
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">提交</button>
+        <a href="{{ url_for('admin_manage') }}" class="btn btn-secondary">返回</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // 密码验证
+    const passwordInput = document.getElementById('password')
+    const confirmInput = document.getElementById('confirm_password')
+    const pwdError = document.getElementById('pwd_error')
+    
+    // 实时验证密码
+    function validatePassword() {
+      if (passwordInput.value !== confirmInput.value) {
+        confirmInput.setCustomValidity('密码不一致')
+        pwdError.style.display = 'block'
+      } else {
+        confirmInput.setCustomValidity('')
+        pwdError.style.display = 'none'
+      }
+    }
+    
+    passwordInput.addEventListener('input', validatePassword)
+    confirmInput.addEventListener('input', validatePassword)
+    
+    // 表单提交验证
+    document.querySelector('form').addEventListener('submit', function (e) {
+      validatePassword()
+      if (!this.checkValidity()) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+      this.classList.add('was-validated')
+    })
+  </script>
+{% endblock %}

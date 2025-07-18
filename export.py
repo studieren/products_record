@@ -1,10 +1,15 @@
-from flask import current_app, Blueprint, Response
-import io, csv
+from models import Product, ProductDetail, ImageRecord, User
+from flask import current_app, Blueprint, Response, jsonify, g
+from flask_login import current_user
+import io
+import csv
 from extensions import db
-from models import Main, Details, ImageRecord
 import traceback
+from threading import Thread
+from utils import collect_missing_prices_task
 
 export_bp = Blueprint("export", __name__)
+data_bp = Blueprint("data", __name__)
 
 
 @export_bp.route("/export/csv", methods=["GET"])
@@ -18,55 +23,66 @@ def export_csv():
         # 写入表头
         writer.writerow(
             [
-                "Main ID",
-                "URL",
-                "Title",
-                "Company Name",
-                "Company URL",
-                "Detail ID",
-                "Other Model",
-                "Self Model",
-                "Price",
-                "Stock",
-                "Detail Image URL",
-                "Local Image Path",
-                "ImageRecord ID",
-                "Image URL",
-                "Local Path",
-                "Download Time",
+                "产品id",
+                "用户id",
+                "网址",
+                "标题",
+                "公司名称",
+                "公司网址",
+                "详情id",
+                "其他型号",
+                "自用型号",
+                "价格",
+                "库存",
+                "详情图片网址",
+                "本地图片路径",
+                "下载时间",
             ]
         )
 
-        # 执行联表查询
-        results = (
-            db.session.query(Main, Details, ImageRecord)
-            .outerjoin(Details, Main.id == Details.main_id)
-            .outerjoin(ImageRecord, Details.id == ImageRecord.details_id)
-            .all()
+        # 构建基础查询
+        base_query = (
+            db.session.query(Product, ProductDetail, ImageRecord, User)
+            .outerjoin(ProductDetail, Product.id == ProductDetail.product_id)
+            .outerjoin(ImageRecord, ProductDetail.id == ImageRecord.detail_id)
+            .outerjoin(User, Product.user_id == User.id)
         )
 
-        current_app.logger.info(f"查询返回 {len(results)} 条记录")
+        # 根据用户角色过滤数据
+        if current_user.is_authenticated and current_user.has_role("销售员"):
+            results = base_query.filter(Product.user_id == current_user.id).all()
+            current_app.logger.info(
+                f"销售员 {current_user.username} 导出自己的产品，共 {len(results)} 条记录"
+            )
+        else:
+            results = base_query.all()
+            current_app.logger.info(f"管理员导出所有产品，共 {len(results)} 条记录")
 
         # 写入数据
-        for index, (main, detail, image) in enumerate(results):
+        for index, (product, detail, image, user) in enumerate(results):
             try:
+                new_img_url = (
+                    f"http://127.0.0.1:1000/{detail.local_image_path}"
+                    if detail and detail.local_image_path
+                    else ""
+                )
+                new_img_url = new_img_url.replace("\\", "/")
+
                 writer.writerow(
                     [
-                        main.id,
-                        main.url,
-                        main.title,
-                        main.company_name,
-                        main.company_url,
+                        product.id,
+                        user.name_cn if user else "",
+                        product.url,
+                        product.title,
+                        product.company_name,
+                        product.company_url,
                         detail.id if detail else "",
                         detail.other_model if detail else "",
                         detail.self_model if detail else "",
                         detail.price if detail else "",
                         detail.stock if detail else "",
                         detail.image_url if detail else "",
-                        detail.local_image_path if detail else "",
-                        image.id if image else "",
-                        image.image_url if image else "",
-                        image.local_path if image else "",
+                        new_img_url,
                         image.download_time.strftime("%Y-%m-%d %H:%M:%S")
                         if image and image.download_time
                         else "",
@@ -89,5 +105,11 @@ def export_csv():
         current_app.logger.error(f"导出 CSV 时发生错误: {str(e)}")
         current_app.logger.debug(traceback.format_exc())
 
-        # 返回错误信息供调试使用（生产环境中建议隐藏）
         return Response(f"导出失败，服务器错误: {str(e)}", status=500)
+
+
+@data_bp.route("/collect_missing_prices", methods=["POST"])
+def trigger_missing_price_collection():
+    thread = Thread(target=collect_missing_prices_task)
+    thread.start()
+    return jsonify({"status": "started", "message": "后台已开始采集缺失价格数据"})

@@ -355,14 +355,16 @@ def extract_prices(html_content):
             product_prices = process_step_prices(step_price_div[0])
         else:
             # 处理非阶梯价（范围价格）
-            range_price_div = module.xpath('.//div[contains(@class, "range-price")]')
+            range_price_div = module.xpath(
+                './/div[@class="price-component range-price"]'
+            )
 
             if range_price_div:
-                class_name = range_price_div[0].get("class")
-                span_ele = module.xpath('//span[@class="label-name"]')
+                # class_name = range_price_div[0].get("class")
+                # span_ele = module.xpath('//span[@class="label-name"]')
 
-                print(class_name)
-                print(span_ele[0].text)
+                # print(class_name)
+                # print(span_ele[0].text)
                 product_prices = process_range_price(range_price_div[0])
             else:
                 product_prices = []
@@ -426,8 +428,9 @@ if __name__ == "__main__":
     url = "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI"  # 多按钮，多尺寸，点击
     # url=''
     # get_page(url)
+    # 是否打开网址并爬取
     # ifvisit = True
-    ifvisit = False
+    ifvisit = False 
 
     # 有效的函数
     data = analysis_data(url, ifvisit)
@@ -470,23 +473,36 @@ if __name__ == "__main__":
     }
 
     # # 示例字典2
-    # mydict2 = {
-    #     "url": "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI",
-    #     "title": "简约立体中空相框diy摆台框架干花作品创意手工空白标本画框装饰",
-    #     "company_name": "东阳市静美工艺品有限公司",
-    #     "company_url": "https://shop71i962493j338.1688.com/page/creditdetail.htm",
-    #     "products": [
-    #         {
-    #             "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01xMbJ721zyDAAXbxVE_!!2200730886782-0-cib.jpg",
-    #             "sku": "原木色中空3厘米【相框+底纸】+6寸摆台：内径10.2*15.2cm",
-    #             "price": "2.8",
-    #             "stock": "693",
-    #         },
-    #         {
-    #             "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01xMbJ721zyDAAXbxVE_!!2200730886782-0-cib.jpg",
-    #             "sku": "原木色中空3厘米【相框+底纸】+7寸摆台：内径12.7*17.8cm",
-    #             "price": "3.7",
-    #             "stock": "395",
-    #         },
-    #     ],
-    # }
+    mydict2 = {
+        "url": "https://detail.1688.com/offer/903597883974.html?spm=a26352.13672862.offerlist.9.78361e62i5i3RI",
+        "title": "简约立体中空相框diy摆台框架干花作品创意手工空白标本画框装饰",
+        "company_name": "东阳市静美工艺品有限公司",
+        "company_url": "https://shop71i962493j338.1688.com/page/creditdetail.htm",
+        "products": [
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01xMbJ721zyDAAXbxVE_!!2200730886782-0-cib.jpg",
+                "sku": "原木色中空3厘米【相框+底纸】+6寸摆台：内径10.2*15.2cm",
+                "price": "2.8",
+                "stock": "684",
+            },
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01xMbJ721zyDAAXbxVE_!!2200730886782-0-cib.jpg",
+                "sku": "原木色中空3厘米【相框+底纸】+7寸摆台：内径12.7*17.8cm",
+                "price": "3.7",
+                "stock": "532",
+            },
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01RpdhfO1zyDAB1zLkP_!!2200730886782-0-cib.jpg",
+                "sku": "胡桃木色中空3厘米【相框+底纸】+6寸摆台：内径10.2*15.2cm",
+                "price": "2.8",
+                "stock": "603",
+            },
+            {
+                "img_url": "https://cbu01.alicdn.com/img/ibank/O1CN01RpdhfO1zyDAB1zLkP_!!2200730886782-0-cib.jpg",
+                "sku": "胡桃木色中空3厘米【相框+底纸】+7寸摆台：内径12.7*17.8cm",
+                "price": "3.7",
+                "stock": "497",
+            },
+        ],
+        "price_data": [{"min": 3, "max": None, "price": Decimal("10.50")}],
+    }

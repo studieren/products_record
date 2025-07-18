@@ -32,6 +32,25 @@
                 <input type="url" class="form-control" id="company_url" name="company_url" value="{{ main.company_url if main else '' }}" >
             </div>
             
+            {% if current_user.has_role('超级管理员') %}
+            <div class="mb-3">
+                <label for="user_id" class="form-label">所属用户</label>
+                {% if users %}
+                <select class="form-control" id="user_id" name="user_id">
+                    <option value="">选择用户</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if main and main.user_id == user.id %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <p class="text-muted">暂无可用用户</p>
+                <a href="{{ url_for('add_user') }}" class="btn btn-sm btn-primary">添加新用户</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            
             <div class="d-flex justify-content-end mt-4">
                 <a href="{{ url_for('list_main') }}" class="btn btn-outline-secondary me-2">取消</a>
                 <button type="submit" class="btn btn-primary">保存</button>
@@ -43,5 +62,4 @@
         <p>正在自动获取数据，请稍候刷新页面查看...</p>
     </div>
     {% endif %}
-    {% endblock %}
-
+{% endblock %}

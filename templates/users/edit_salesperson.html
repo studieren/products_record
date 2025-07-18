@@ -1,0 +1,201 @@
+<!-- edit_salesperson.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">编辑用户信息</h2>
+  <form method="POST" class="form-container">
+    <!-- 用户名 -->
+    <div class="mb-3">
+      <label class="form-label">用户名</label>
+      <input
+        type="text"
+        name="username"
+        class="form-control"
+        value="{{ salesperson.username }}"
+        required
+      />
+    </div>
+
+    <!-- 密码：留空则不修改 -->
+    <div class="mb-3">
+      <label class="form-label">新密码（留空保持原密码）</label>
+      <input
+        type="password"
+        name="password"
+        class="form-control"
+        placeholder="留空不修改"
+      />
+    </div>
+
+    <div class="mb-3" id="confirm_group" style="display: none">
+      <label class="form-label">确认新密码</label>
+      <input type="password" class="form-control" id="confirm_password_edit" />
+      <div class="invalid-feedback" id="pwd_error_edit" style="display: none">
+        两次密码不一致
+      </div>
+    </div>
+
+    <!-- 中文名 -->
+    <div class="mb-3">
+      <label class="form-label">中文名</label>
+      <input
+        type="text"
+        name="name_cn"
+        class="form-control"
+        value="{{ salesperson.name_cn or '' }}"
+      />
+    </div>
+
+    <!-- 英文名 -->
+    <div class="mb-3">
+      <label class="form-label">英文名</label>
+      <input
+        type="text"
+        name="name_en"
+        class="form-control"
+        value="{{ salesperson.name_en or '' }}"
+      />
+    </div>
+
+    <!-- 手机号 -->
+    <div class="mb-3">
+      <label class="form-label">手机号</label>
+      <input
+        type="text"
+        name="phone"
+        class="form-control"
+        value="{{ salesperson.phone or '' }}"
+      />
+    </div>
+
+    <!-- 邮箱 -->
+    <div class="mb-3">
+      <label class="form-label">邮箱</label>
+      <input
+        type="email"
+        name="email"
+        class="form-control"
+        value="{{ salesperson.email or '' }}"
+      />
+    </div>
+
+    <!-- 社交媒体信息 -->
+    <div class="mb-3">
+      <label class="form-label">微信</label>
+      <input
+        type="text"
+        name="wechat"
+        class="form-control"
+        value="{{ salesperson.wechat or '' }}"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">WhatsApp</label>
+      <input
+        type="text"
+        name="whatsapp"
+        class="form-control"
+        value="{{ salesperson.whatsapp or '' }}"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Facebook</label>
+      <input
+        type="text"
+        name="facebook"
+        class="form-control"
+        value="{{ salesperson.facebook or '' }}"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Instagram</label>
+      <input
+        type="text"
+        name="instagram"
+        class="form-control"
+        value="{{ salesperson.instagram or '' }}"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">TikTok</label>
+      <input
+        type="text"
+        name="tiktok"
+        class="form-control"
+        value="{{ salesperson.tiktok or '' }}"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Twitter</label>
+      <input
+        type="text"
+        name="twitter"
+        class="form-control"
+        value="{{ salesperson.twitter or '' }}"
+      />
+    </div>
+    {% if is_admin %}
+    <!-- 是否激活 -->
+    <div class="mb-3 form-check">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="is_active"
+        name="is_active"
+        {% if salesperson.is_active %}checked{% endif %}
+      />
+      <label class="form-check-label" for="is_active">是否激活</label>
+    </div>
+
+    <!-- 角色选择 -->
+    <div class="mb-3">
+      <label class="form-label">角色</label>
+      {% for role in roles %}
+      <div class="form-check">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          name="roles"
+          value="{{ role.id }}"
+          id="role_{{ role.id }}"
+          {% if role in salesperson.roles %}checked{% endif %}
+        />
+        <label class="form-check-label" for="role_{{ role.id }}">{{ role.name }}</label>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 按钮 -->
+    <button type="submit" class="btn btn-primary">保存</button>
+    <a href="{{ url_for('list_salespersons') }}" class="btn btn-secondary">取消</a>
+  </form>
+</div>
+
+<script>
+  const pwdInput = document.querySelector('[name="password"]');
+  const confirmGroup = document.getElementById("confirm_group");
+  const confirmInput = document.getElementById("confirm_password_edit");
+  const err = document.getElementById("pwd_error_edit");
+
+  // 密码确认逻辑
+  pwdInput.addEventListener("input", () => {
+    const show = pwdInput.value.length > 0;
+    confirmGroup.style.display = show ? "block" : "none";
+  });
+
+  document.querySelector("form").addEventListener("submit", function (e) {
+    if (pwdInput.value && pwdInput.value !== confirmInput.value) {
+      e.preventDefault();
+      err.style.display = "block";
+    } else {
+      err.style.display = "none";
+    }
+  });
+</script>
+{% endblock %}

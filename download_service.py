@@ -8,7 +8,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from flask import current_app
 from extensions import db
-from models import Details, ImageRecord
+from models import ProductDetail, ImageRecord
 from config import headers
 
 IMAGE_FOLDER = Path("static/images")
@@ -71,7 +71,7 @@ def download_single_image(detail):
 
 def download_images_async(current_app, detail_ids):
     with current_app.app_context():
-        details = Details.query.filter(Details.id.in_(detail_ids)).all()
+        details = ProductDetail.query.filter(ProductDetail.id.in_(detail_ids)).all()
         image_records_to_add = []
         details_to_update = []
 

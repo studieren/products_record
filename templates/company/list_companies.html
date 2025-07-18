@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-header">公司列表</h2>
+    <a href="{{ url_for('add_company') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> 添加公司</a>
+  </div>
   <div class="container mt-5">
-    <h2 class="mb-4">公司信息列表</h2>
     <table class="table table-bordered table-striped">
       <thead class="table-light">
         <tr>

@@ -36,7 +36,7 @@
           {% for result in results %}
             <tr>
               <td>
-                <a href="{{ url_for('list_details', main_id=result.main.id) }}">{{ result.main.title }}</a>
+                <a href="{{ url_for('list_details', product_id=result.main.id) }}">{{ result.main.title }}</a>
               </td>
               <td>{{ result.main.company_name }}</td>
               <td>
@@ -71,8 +71,8 @@
                   {{ result.detail.stock_str }}
               </td>
               <td>
-                {% if result.detail.image_url %}
-                  <a href="javascript:void(0);" onclick="showImageModal('{{ result.detail.image_url }}')"><img src="{{ result.detail.image_url }}" alt="产品图片" class="img-thumbnail" style="max-width: 200px;" /></a>
+                {% if result.detail.local_image_path %}
+                  <a href="javascript:void(0);" onclick="showImageModal('{{ result.detail.local_image_path }}')"><img src="{{ result.detail.local_image_path }}" alt="产品图片" class="img-thumbnail" style="max-width: 200px;" /></a>
                 {% else %}
                   <span class="text-muted">无图片</span>
                 {% endif %}
